@@ -1,0 +1,8 @@
+{
+    "appId": "com.yourname.quranapp",
+    "appName": "Understanding the Quran",
+    "webDir": ".",
+    "server": {
+          "androidScheme": "https"
+    }
+}

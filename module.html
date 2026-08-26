@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Surah module</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E2B28;
+    --parchment:#FBF6EB;
+    --parchment-2:#F3EAD3;
+    --teal:#0B3D3A;
+    --teal-light:#155C56;
+    --gold:#C9A24B;
+    --gold-light:#E4C97A;
+    --maroon:#7A2E2E;
+    --line:#D8CBA6;
+    --muted:#6B6255;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--parchment);color:var(--ink);font-family:'Work Sans', sans-serif;line-height:1.6;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px 80px;}
+
+  header.hero{background:var(--teal);color:var(--parchment);text-align:center;padding:56px 20px 150px;position:relative;overflow:hidden;}
+  header.hero::after{content:"";position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:220px;height:110px;background:var(--parchment);border-radius:110px 110px 0 0;}
+  .arch-inner{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:186px;height:93px;background:var(--teal);border-radius:93px 93px 0 0;}
+  .eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin:0 0 14px;}
+  .arabic{font-family:'Amiri', serif;font-size:52px;margin:0 0 6px;}
+  .translit{font-family:'Amiri', serif;font-size:30px;font-weight:700;margin:0 0 8px;}
+  .meaning{font-size:15px;color:var(--parchment-2);margin:0;}
+
+  .meta-row{display:flex;justify-content:center;gap:28px;margin-top:-52px;position:relative;z-index:2;flex-wrap:wrap;}
+  .meta-card{background:var(--parchment);border:1px solid var(--line);border-radius:10px;padding:14px 22px;text-align:center;min-width:110px;}
+  .meta-card .n{font-family:'Amiri',serif;font-size:22px;font-weight:700;color:var(--teal);}
+  .meta-card .l{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+
+  .beads{display:flex;justify-content:center;align-items:center;gap:10px;margin:36px 0 8px;}
+  .bead{width:22px;height:22px;border-radius:50%;background:var(--parchment-2);border:1.5px solid var(--line);transition:background .25s, border-color .25s;}
+  .bead.done{background:var(--gold);border-color:var(--gold);}
+  .bead-thread{flex:0 0 18px;height:1.5px;background:var(--line);}
+  .beads-label{text-align:center;font-size:12px;color:var(--muted);margin-bottom:36px;}
+
+  section.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px 28px;margin-bottom:20px;}
+  section.card h2{font-family:'Amiri', serif;font-size:22px;color:var(--teal);margin:0 0 4px;}
+  section.card .tag{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:600;margin:0 0 14px;}
+  ul.facts{margin:0;padding-left:20px;}
+  ul.facts li{margin-bottom:10px;}
+  ul.facts li:last-child{margin-bottom:0;}
+
+  .respect-note{background:var(--parchment-2);border-left:3px solid var(--gold);padding:12px 16px;font-size:14px;color:var(--muted);margin-top:16px;}
+
+  .quiz-q{display:none;}
+  .quiz-q.active{display:block;}
+  .quiz-progress{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  .quiz-prompt{font-size:16px;font-weight:500;margin:0 0 16px;}
+  .quiz-opt{display:block;width:100%;text-align:left;background:var(--parchment);border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin-bottom:10px;font-family:'Work Sans',sans-serif;font-size:14px;color:var(--ink);cursor:pointer;transition:border-color .15s, background .15s;}
+  .quiz-opt:hover{border-color:var(--teal-light);}
+  .quiz-opt.correct{background:#E7F0DE;border-color:#6B9A45;}
+  .quiz-opt.incorrect{background:#F5E3E1;border-color:var(--maroon);}
+  .quiz-feedback{font-size:13px;margin-top:4px;min-height:18px;color:var(--teal-light);}
+  .quiz-nav{display:flex;justify-content:flex-end;margin-top:18px;}
+  button.next-btn{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'Work Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;opacity:0.4;pointer-events:none;transition:opacity .2s;}
+  button.next-btn.ready{opacity:1;pointer-events:auto;}
+  button.next-btn:hover.ready{background:var(--teal-light);}
+
+  .quiz-result{display:none;text-align:center;padding:20px 0 4px;}
+  .quiz-result .score{font-family:'Amiri',serif;font-size:40px;color:var(--teal);margin:0 0 8px;}
+  .quiz-result p{color:var(--muted);font-size:14px;}
+
+  .module-nav{display:flex;justify-content:space-between;align-items:center;margin-top:30px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;}
+  .module-nav a{text-decoration:none;color:var(--muted);}
+  .module-nav a.next{color:var(--teal);font-weight:500;}
+  footer.note{font-size:12px;color:var(--muted);text-align:center;margin-top:30px;}
+</style>
+</head>
+<body>
+
+<header class="hero" id="hero">
+  <div class="eyebrow" id="eyebrow"></div>
+  <p class="arabic" id="arabic"></p>
+  <p class="translit" id="translit"></p>
+  <p class="meaning" id="meaning"></p>
+  <div class="arch-inner"></div>
+</header>
+
+<div class="wrap">
+  <div class="meta-row" id="meta-row"></div>
+
+  <div class="beads" id="beads">
+    <div class="bead" data-bead="0"></div><div class="bead-thread"></div>
+    <div class="bead" data-bead="1"></div><div class="bead-thread"></div>
+    <div class="bead" data-bead="2"></div><div class="bead-thread"></div>
+    <div class="bead" data-bead="3"></div><div class="bead-thread"></div>
+    <div class="bead" data-bead="4"></div>
+  </div>
+  <p class="beads-label">Your progress through this module</p>
+
+  <section class="card" data-layer="0">
+    <p class="tag">Snapshot</p>
+    <h2>Where it sits</h2>
+    <p id="snapshot"></p>
+  </section>
+
+  <section class="card" data-layer="1">
+    <p class="tag">Fun facts</p>
+    <h2>Worth knowing</h2>
+    <ul class="facts" id="facts"></ul>
+  </section>
+
+  <section class="card" data-layer="2">
+    <p class="tag">Key knowledge</p>
+    <h2>What it's about</h2>
+    <div id="key"></div>
+  </section>
+
+  <section class="card" data-layer="3">
+    <p class="tag">Respect &amp; adab</p>
+    <h2>How it's held</h2>
+    <p id="respect-main"></p>
+    <div class="respect-note" id="respect-note">A note on this section: practices and virtues tied to specific surahs are best learned in depth from a knowledgeable teacher or scholar — this module aims to introduce the surah respectfully, not to serve as religious instruction on its own.</div>
+  </section>
+
+  <section class="card" data-layer="4">
+    <p class="tag">Check your understanding</p>
+    <h2>Quick quiz</h2>
+    <div id="quiz-body"></div>
+    <div class="quiz-result" id="quiz-result">
+      <p class="score" id="quiz-score">0 / 5</p>
+      <p>This is just for you — no ranking, no comparison. Revisit any section above any time.</p>
+    </div>
+  </section>
+
+  <div class="module-nav">
+    <a id="nav-prev" href="index.html">&larr; All chapters</a>
+    <a id="nav-next" class="next" href="index.html">All chapters &rarr;</a>
+  </div>
+  <footer class="note" id="module-footer"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="data.js"></script>
+<script src="data-layer.js"></script>
+<script src="auth.js"></script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const n = parseInt(params.get('n')) || 114;
+
+loadSurahData().then(({data, source})=>{
+  window.surahData = data;
+  if(source !== 'live'){
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:var(--parchment-2);color:var(--muted);font-size:12px;text-align:center;padding:6px;';
+    banner.textContent = source === 'cache' ? 'Showing saved content (offline)' : 'Showing built-in content (offline)';
+    document.body.insertBefore(banner, document.body.firstChild);
+  }
+  renderModule(data[n], n);
+}).catch(()=>{
+  document.querySelector('.wrap').innerHTML = '<p style="padding:60px 20px;text-align:center;color:var(--muted);">Couldn\'t load content. Check your connection and try again.</p>';
+});
+
+function renderModule(s, n){
+if(!s){
+  document.querySelector('.wrap').innerHTML = '<p style="padding:60px 20px;text-align:center;color:var(--muted);">Module for surah ' + n + ' isn\'t ready yet. <a href="index.html">Back to all chapters</a></p>';
+} else {
+  document.title = 'Surah ' + s.translit + ' — Module';
+  document.getElementById('eyebrow').textContent = 'Surah ' + n + ' of 114';
+  document.getElementById('arabic').textContent = s.ar;
+  document.getElementById('translit').textContent = s.translit;
+  document.getElementById('meaning').textContent = '"' + s.meaning + '"';
+
+  document.getElementById('meta-row').innerHTML = `
+    <div class="meta-card"><div class="n">${s.verses}</div><div class="l">Verses</div></div>
+    <div class="meta-card"><div class="n">${s.type}</div><div class="l">Revealed in</div></div>
+    <div class="meta-card"><div class="n">${n}${n===1?'st':n===2?'nd':n===3?'rd':'th'}</div><div class="l">Position</div></div>
+  `;
+
+  document.getElementById('snapshot').textContent = s.snapshot;
+  document.getElementById('facts').innerHTML = s.facts.map(f=>'<li>'+f+'</li>').join('');
+  document.getElementById('key').innerHTML = s.key.map(p=>'<p>'+p+'</p>').join('');
+  document.getElementById('respect-main').textContent = s.respect;
+
+  document.getElementById('module-footer').textContent = 'Surah ' + n + ' of 114 · going from Surah 114 back to Surah 1';
+
+  const prevN = n + 1;
+  const nextN = n - 1;
+  const prevLink = document.getElementById('nav-prev');
+  const nextLink = document.getElementById('nav-next');
+  if(window.surahData[prevN]){
+    prevLink.href = 'module.html?n=' + prevN;
+    prevLink.textContent = '\u2190 Back: ' + window.surahData[prevN].translit + ' (' + prevN + ')';
+  } else {
+    prevLink.href = 'index.html';
+    prevLink.textContent = '\u2190 All chapters';
+  }
+  if(window.surahData[nextN]){
+    nextLink.href = 'module.html?n=' + nextN;
+    nextLink.textContent = 'Next: ' + window.surahData[nextN].translit + ' (' + nextN + ') \u2192';
+  } else {
+    nextLink.href = 'index.html';
+    nextLink.textContent = 'All chapters \u2192';
+  }
+
+  const questions = s.quiz;
+  let current = 0;
+  let score = 0;
+  const answered = new Array(questions.length).fill(false);
+
+  function renderQuestion(i){
+    const q = questions[i];
+    const body = document.getElementById('quiz-body');
+    body.innerHTML = `
+      <div class="quiz-progress">Question ${i+1} of ${questions.length}</div>
+      <p class="quiz-prompt">${q.prompt}</p>
+      <div id="opts"></div>
+      <p class="quiz-feedback" id="feedback"></p>
+      <div class="quiz-nav"><button class="next-btn" id="next-btn">${i === questions.length-1 ? 'See result' : 'Next question'}</button></div>
+    `;
+    const optsWrap = document.getElementById('opts');
+    q.options.forEach((opt, idx)=>{
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.type = 'button';
+      btn.textContent = opt;
+      btn.addEventListener('click', ()=>selectOption(idx, i));
+      optsWrap.appendChild(btn);
+    });
+    document.getElementById('next-btn').addEventListener('click', ()=>{
+      if(!answered[i]) return;
+      if(i < questions.length - 1){
+        current = i+1;
+        renderQuestion(current);
+      } else {
+        showResult();
+      }
+    });
+    updateBeads(4);
+  }
+
+  function selectOption(idx, qIndex){
+    if(answered[qIndex]) return;
+    const q = questions[qIndex];
+    answered[qIndex] = true;
+    const optBtns = document.querySelectorAll('#opts .quiz-opt');
+    optBtns.forEach((b, bi)=>{
+      b.style.cursor = 'default';
+      if(bi === q.correct) b.classList.add('correct');
+      if(bi === idx && idx !== q.correct) b.classList.add('incorrect');
+    });
+    const feedback = document.getElementById('feedback');
+    if(idx === q.correct){
+      score++;
+      feedback.textContent = "That's right. " + q.explain;
+    } else {
+      feedback.textContent = q.explain;
+    }
+    document.getElementById('next-btn').classList.add('ready');
+  }
+
+  function showResult(){
+    document.getElementById('quiz-body').style.display = 'none';
+    const result = document.getElementById('quiz-result');
+    result.style.display = 'block';
+    document.getElementById('quiz-score').textContent = score + ' / ' + questions.length;
+    saveQuizResult(n, score, questions.length);
+  }
+
+  function updateBeads(upTo){
+    document.querySelectorAll('.bead').forEach(b=>{
+      if(parseInt(b.dataset.bead) <= upTo) b.classList.add('done');
+    });
+  }
+
+  let seenLayers = new Set();
+  const sections = document.querySelectorAll('section.card');
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const layer = parseInt(entry.target.dataset.layer);
+        const isNew = !seenLayers.has(layer);
+        seenLayers.add(layer);
+        updateBeads(Math.max(...seenLayers));
+        if(isNew) saveLayersSeen(n, Array.from(seenLayers));
+      }
+    });
+  }, {threshold:0.5});
+  sections.forEach(sec=>observer.observe(sec));
+
+  renderQuestion(0);
+}
+}
+</script>
+
+</body>
+</html>

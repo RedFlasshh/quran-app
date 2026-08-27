@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>My Progress — Understanding the Quran</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+      :root{
+            --ink:#1E2B28;
+            --parchment:#FBF6EB;
+            --parchment-2:#F3EAD3;
+            --teal:#0B3D3A;
+            --teal-light:#155C56;
+            --gold:#C9A24B;
+            --gold-light:#E4C97A;
+            --line:#D8CBA6;
+            --muted:#6B6255;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--parchment);color:var(--ink);font-family:'Work Sans',sans-serif;line-height:1.6;}
+      .wrap{max-width:760px;margin:0 auto;padding:0 20px 80px;}
+      header{background:var(--teal);color:var(--parchment);text-align:center;padding:56px 20px 60px;position:relative;}
+      .eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin:0 0 12px;}
+      h1{font-family:'Amiri',serif;font-size:32px;margin:0 0 10px;}
+      header p{font-size:14px;color:var(--parchment-2);max-width:480px;margin:0 auto;}
+      .stats-row{display:flex;gap:14px;margin-top:-30px;position:relative;z-index:2;flex-wrap:wrap;justify-content:center;}
+      .stat-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 24px;text-align:center;min-width:120px;}
+      .stat-card .n{font-family:'Amiri',serif;font-size:26px;font-weight:700;color:var(--teal);}
+      .stat-card .l{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+      section.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:24px 26px;margin:24px 0;}
+      section.card h2{font-family:'Amiri',serif;font-size:20px;color:var(--teal);margin:0 0 16px;}
+      .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;}
+      .badge{border:1px solid var(--line);border-radius:10px;padding:16px 12px;text-align:center;}
+      .badge.earned{background:var(--parchment-2);border-color:var(--gold);}
+      .badge.locked{opacity:.45;}
+      .badge .icon{font-size:24px;margin-bottom:8px;}
+      .badge .label{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 4px;}
+      .badge .desc{font-size:11px;color:var(--muted);margin:0;}
+      .completed-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+      .completed-item{display:block;border:1px solid var(--line);border-radius:8px;padding:12px;text-decoration:none;color:var(--ink);}
+      .completed-item .n{font-size:11px;color:var(--muted);}
+      .completed-item .name{font-size:14px;font-weight:500;}
+      .signed-out-note{text-align:center;color:var(--muted);padding:40px 20px;}
+      .signed-out-note button{margin-top:14px;background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:inherit;font-size:14px;cursor:pointer;}
+    </style>
+  </head>
+  <body data-back="true">
+    <header>
+      <p class="eyebrow">Understanding the Quran</p>p>
+      <h1>My Progress</h1>
+    <p>Your own record, no comparisons, no leaderboard, just what you have read.</p>
+    </header>
+  <div class="wrap">
+  <div id="content"></div>div>
+  </div>div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="data.js"></script>
+  <script src="auth.js"></script>
+  <script src="nav.js"></script>
+  <script>
+    async function renderProgress() {
+        var content = document.getElementById('content');
+        if (!currentUser) {
+              content.innerHTML = '<div class="signed-out-note"><p>Sign in to see your progress and badges.</p><button id="progress-signin-btn">Sign in</button></div>';
+              var signInBtn = document.getElementById('progress-signin-btn');
+              if (signInBtn) signInBtn.addEventListener('click', openAuthModal);
+              return;
+        }
+        var progress = await getMyProgress();
+        var completedEntries = Object.entries(progress).filter(function(e) { return e[1].completed_at; });
+        var completedCount = completedEntries.length;
+        var pct = Math.round((completedCount / 114) * 100);
+        var badges = computeBadges(progress);
+        var html = '';
+        html += '<div class="stats-row">';
+        html += '<div class="stat-card"><div class="n">' + completedCount + '</div><div class="l">Completed</div></div>';
+        html += '<div class="stat-card"><div class="n">' + pct + '%</div><div class="l">Of 114</div></div>';
+        html += '</div>';
+        html += '<section class="card"><h2>Badges</h2><div class="badge-grid">';
+        badges.forEach(function(b) {
+              html += '<div class="badge ' + (b.earned ? 'earned' : 'locked') + '">';
+              html += '<div class="icon">' + (b.earned ? 'STAR' : 'LOCK') + '</div>';
+              html += '<p class="label">' + b.label + '</p>';
+              html += '<p class="desc">' + b.desc + '</p>';
+              html += '</div>';
+        });
+        html += '</div></section>';
+        html += '<section class="card"><h2>Completed surahs</h2>';
+        if (completedCount === 0) {
+              html += '<p style="color:var(--muted);font-size:14px;">None yet. Finish a quiz or tap Mark as Read on a module to see it here.</p>';
+        } else {
+              html += '<div class="completed-grid">';
+              var nums = completedEntries.map(function(e) { return parseInt(e[0]); }).sort(function(a, b) { return b - a; });
+              nums.forEach(function(sn) {
+                      var s = (typeof surahData !== 'undefined' && surahData[sn]) ? surahData[sn] : null;
+                      var name = s ? s.translit : ('Surah ' + sn);
+                      html += '<a class="completed-item" href="module.html?n=' + sn + '"><div class="n">Surah ' + sn + '</div><div class="name">' + name + '</div></a>';
+              });
+              html += '</div>';
+        }
+        html += '</section>';
+        content.innerHTML = html;
+    }
+    renderProgress();
+    sb.auth.onAuthStateChange(function() { renderProgress(); });
+  </script>
+  </body>
+</html>
+  </script></p></h1>
+    </header>
+  </style></title>
+  </head>

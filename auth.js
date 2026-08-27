@@ -9,7 +9,9 @@
 // whatever page includes it, so index.html and module.html both get the
 // same "Sign in" / avatar + "Sign out" UI without duplicating markup.
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const isNativeApp = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+const NATIVE_REDIRECT_URL = 'com.yourname.quranapp://login-callback';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { flowType: 'pkce' } });
 
 let currentUser = null;
 
@@ -22,6 +24,19 @@ async function initAuth() {
         currentUser = session ? session.user : null;
         renderAccountWidget();
   });
+
+      if (isNativeApp && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
+              window.Capacitor.Plugins.App.addListener('appUrlOpen', async (data) => {
+                        const url = data && data.url ? data.url : '';
+                        if (url.indexOf('login-callback') !== -1) {
+                                    try {
+                                                  await sb.auth.exchangeCodeForSession(url);
+                                    } catch (e) {
+                                                  console.error('Native sign-in exchange failed', e);
+                                    }
+                        }
+              });
+      }
 }
 
 function renderAccountWidget() {
@@ -91,7 +106,7 @@ function openAuthModal() {
   document.getElementById('google-signin-btn').addEventListener('click', async () => {
         await sb.auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: window.location.href }
+                        options: { redirectTo: isNativeApp ? NATIVE_REDIRECT_URL : window.location.href }
         });
   });
 

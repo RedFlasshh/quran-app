@@ -186,4 +186,42 @@ async function getMyProgress() {
     return map;
 }
 
+// Lets someone mark a surah as read even without finishing the quiz -
+// e.g. if they've already studied it elsewhere and just want it tracked.
+async function markAsRead(surahN) {
+      if (!currentUser) {
+              openAuthModal();
+              return;
+      }
+      await sb.from('user_progress').upsert({
+              user_id: currentUser.id,
+              surah_n: surahN,
+              completed_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,surah_n' });
+}
+
+// Badge definitions, checked against how many surahs someone has completed.
+// Purely computed from user_progress - no separate table needed.
+const BADGE_DEFS = [
+    { key: 'first', label: 'First Step', desc: 'Complete your first surah', threshold: 1 },
+    { key: 'five', label: 'Getting Started', desc: 'Complete 5 surahs', threshold: 5 },
+    { key: 'ten', label: 'Ten Chapters', desc: 'Complete 10 surahs', threshold: 10 },
+    { key: 'twentyfive', label: 'Quarter Century', desc: 'Complete 25 surahs', threshold: 25 },
+    { key: 'juzamma', label: 'Juz Amma', desc: 'Complete all of Juz Amma (surahs 114-78)', threshold: 37 },
+    { key: 'halfway', label: 'Halfway There', desc: 'Complete 57 surahs', threshold: 57 },
+    { key: 'whole', label: 'The Whole Quran', desc: 'Complete all 114 surahs', threshold: 114 }
+    ];
+
+function computeBadges(progressMap) {
+      const completedCount = Object.values(progressMap).filter(p => p.completed_at).length;
+      return BADGE_DEFS.map(b => ({
+              key: b.key,
+              label: b.label,
+              desc: b.desc,
+              threshold: b.threshold,
+              earned: completedCount >= b.threshold
+      }));
+}
+
 initAuth();

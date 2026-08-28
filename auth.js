@@ -31,6 +31,9 @@ async function initAuth() {
                         if (url.indexOf('login-callback') !== -1) {
                                     try {
                                                   await sb.auth.exchangeCodeForSession(url);
+                                                            if (window.Capacitor.Plugins.Browser) {
+                                                                                      window.Capacitor.Plugins.Browser.close();
+                                                            }
                                     } catch (e) {
                                                   console.error('Native sign-in exchange failed', e);
                                     }
@@ -104,10 +107,21 @@ function openAuthModal() {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAuthModal(); });
 
   document.getElementById('google-signin-btn').addEventListener('click', async () => {
-        await sb.auth.signInWithOAuth({
-                provider: 'google',
-                        options: { redirectTo: isNativeApp ? NATIVE_REDIRECT_URL : window.location.href }
-        });
+        if (isNativeApp) {
+                const oauthResult = await sb.auth.signInWithOAuth({
+                          provider: 'google',
+                          options: { redirectTo: NATIVE_REDIRECT_URL, skipBrowserRedirect: true }
+                });
+                const oauthUrl = oauthResult && oauthResult.data ? oauthResult.data.url : null;
+                if (oauthUrl && window.Capacitor.Plugins.Browser) {
+                          await window.Capacitor.Plugins.Browser.open({ url: oauthUrl });
+                }
+        } else {
+                await sb.auth.signInWithOAuth({
+                          provider: 'google',
+                          options: { redirectTo: window.location.href }
+                });
+        }
   });
 
   document.getElementById('send-link-btn').addEventListener('click', async () => {

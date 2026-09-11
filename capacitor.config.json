@@ -1,8 +1,9 @@
 {
-    "appId": "com.yourname.quranapp",
-    "appName": "Understanding the Quran",
-    "webDir": ".",
-    "server": {
-          "androidScheme": "https"
-    }
+  "appId": "com.understandingquran.app",
+  "appName": "Understanding the Quran",
+  "webDir": "public",
+  "server": {
+    "url": "https://quran-app-two-tau.vercel.app",
+    "androidScheme": "https"
+  }
 }

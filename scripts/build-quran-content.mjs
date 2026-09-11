@@ -124,12 +124,28 @@ async function main() {
       }
 
       for (const source of Object.keys(TAFSIR_SLUGS)) {
-        const parts = [];
+        // This mirror stores one commentary block per ayah even when a single
+        // block of prose actually covers several consecutive ayahs together --
+        // it just copy-pastes the identical text onto every ayah in that span.
+        // Concatenating naively (as an earlier version of this script did)
+        // multiplied that duplication, inflating some entries to 90,000+
+        // characters. Collapse consecutive identical blocks into one, labeled
+        // with the ayah range it actually covers.
+        const blocks = [];
         for (let ayahNum = start; ayahNum <= end; ayahNum++) {
           const text = tafsirBySource[source][ayahNum];
-          if (text) parts.push(`[${n}:${ayahNum}] ${text}`);
+          if (!text) continue;
+          const last = blocks[blocks.length - 1];
+          if (last && last.text === text) last.ayahEnd = ayahNum;
+          else blocks.push({ ayahStart: ayahNum, ayahEnd: ayahNum, text });
         }
-        tafsirLines.push({ modKey, source, body: parts.join("\n\n") });
+        const body = blocks
+          .map((b) => {
+            const label = b.ayahStart === b.ayahEnd ? `${n}:${b.ayahStart}` : `${n}:${b.ayahStart}-${b.ayahEnd}`;
+            return `[${label}] ${b.text}`;
+          })
+          .join("\n\n");
+        tafsirLines.push({ modKey, source, body });
       }
     }
 

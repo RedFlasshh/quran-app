@@ -1,0 +1,15 @@
+{
+  "name": "Understanding the Quran",
+  "short_name": "Quran",
+  "description": "The Quran, ayah by ayah — Arabic text, Saheeh International translation, and tafsir from Ibn Kathir, Ma'arif al-Qur'an, and al-Jalalayn.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E1A16",
+  "theme_color": "#0E1A16",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

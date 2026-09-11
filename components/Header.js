@@ -15,18 +15,33 @@ export default function Header() {
         <span className="amiri" style={{ fontSize: 20, color: C.goldBright }}>ق</span>
         <span style={{ fontSize: 15, fontWeight: 600, color: C.ivory }}>Understanding the Quran</span>
       </Link>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         <Link href="/progress" aria-label="Your progress" style={{ color: C.faint, display: "flex" }}>
           <Award size={18} />
         </Link>
         {isNativeApp() && (
-          <button onClick={exitApp} aria-label="Exit app" style={{ background: "none", border: "none", color: C.faint, cursor: "pointer", padding: 4 }}><X size={18} /></button>
+          <>
+            <div style={{ width: 1, height: 18, background: C.line }} />
+            <button onClick={exitApp} aria-label="Exit app"
+              style={{ display: "flex", background: "none", border: `1px solid ${C.line}`, borderRadius: 999, color: C.faint, cursor: "pointer", padding: 6 }}>
+              <X size={16} />
+            </button>
+          </>
         )}
         {session === undefined ? null : session?.user ? (
-          <button onClick={signOut} aria-label="Sign out" title={profile?.alias || "Sign out"}
-            style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: C.faint, cursor: "pointer", padding: 4 }}>
-            <User size={16} /><LogOut size={16} />
-          </button>
+          <>
+            <div style={{ width: 1, height: 18, background: C.line }} />
+            <button onClick={signOut} aria-label="Sign out" title={profile?.alias || "Sign out"}
+              style={{ display: "flex", alignItems: "center", gap: 7, background: "none", border: `1px solid ${C.line}`, borderRadius: 999, cursor: "pointer", padding: "5px 10px 5px 5px" }}>
+              {session.user.user_metadata?.avatar_url ? (
+                <img src={session.user.user_metadata.avatar_url} alt="" width={20} height={20}
+                  style={{ borderRadius: "50%", display: "block" }} referrerPolicy="no-referrer" />
+              ) : (
+                <User size={16} color={C.faint} />
+              )}
+              <LogOut size={14} color={C.faint} />
+            </button>
+          </>
         ) : (
           <button onClick={() => setShowSignIn(true)}
             style={{ background: C.surface2, border: `1px solid ${C.line}`, color: C.gold, borderRadius: 999, padding: "6px 14px", fontSize: 13, cursor: "pointer" }}>

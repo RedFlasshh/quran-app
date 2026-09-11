@@ -42,6 +42,12 @@ export function useAuth() {
         console.log("[QuranAuth] url did not match login-callback, ignoring");
         return;
       }
+      // Close the Custom Tab the instant we know we're on the callback --
+      // waiting until after the network round-trip below (as this used to)
+      // left the tab visibly stuck on some devices until the user tapped
+      // back into the app, even though the session was already exchanged
+      // in the background.
+      window.Capacitor.Plugins.Browser?.close();
       try {
         const code = new URL(url).searchParams.get("code");
         console.log("[QuranAuth] extracted code present=", !!code);
@@ -51,8 +57,6 @@ export function useAuth() {
         }
       } catch (e) {
         console.error("[QuranAuth] Native sign-in exchange failed:", e);
-      } finally {
-        window.Capacitor.Plugins.Browser?.close();
       }
     });
     return () => { handle?.then?.((h) => h.remove()); };

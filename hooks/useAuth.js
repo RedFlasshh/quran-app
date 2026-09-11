@@ -33,14 +33,24 @@ export function useAuth() {
   // (Google blocks it inside embedded WebViews), and this listens for the
   // custom-scheme redirect back into the app to exchange the PKCE code.
   useEffect(() => {
+    console.log("[QuranAuth] mount check: isNativeApp=", isNativeApp(), "App plugin present=", !!window.Capacitor?.Plugins?.App);
     if (!isNativeApp() || !window.Capacitor?.Plugins?.App) return;
+    console.log("[QuranAuth] registering appUrlOpen listener");
     const handle = window.Capacitor.Plugins.App.addListener("appUrlOpen", async ({ url }) => {
-      if (!url || !url.includes("login-callback")) return;
+      console.log("[QuranAuth] appUrlOpen fired, url=", url);
+      if (!url || !url.includes("login-callback")) {
+        console.log("[QuranAuth] url did not match login-callback, ignoring");
+        return;
+      }
       try {
         const code = new URL(url).searchParams.get("code");
-        if (code) await supabase.auth.exchangeCodeForSession(code);
+        console.log("[QuranAuth] extracted code present=", !!code);
+        if (code) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          console.log("[QuranAuth] exchangeCodeForSession error=", error ? error.message : "none", "session set=", !!data?.session);
+        }
       } catch (e) {
-        console.error("Native sign-in exchange failed:", e);
+        console.error("[QuranAuth] Native sign-in exchange failed:", e);
       } finally {
         window.Capacitor.Plugins.Browser?.close();
       }
@@ -71,6 +81,7 @@ export function useAuth() {
           provider: "google",
           options: { redirectTo: NATIVE_REDIRECT_URL, skipBrowserRedirect: true },
         });
+        console.log("[QuranAuth] signInWithOAuth (native) error=", error ? error.message : "none", "url=", data?.url);
         if (error) throw error;
         if (data?.url) await window.Capacitor?.Plugins?.Browser?.open({ url: data.url });
       } else {
